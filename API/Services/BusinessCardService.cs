@@ -5,38 +5,22 @@ using System.Threading.Tasks;
 using API.DTOs;
 using API.Entities;
 using API.Interfaces;
+using AutoMapper;
 
 namespace API.Services
 {
-    public class BusinessCardService(IBusinessCardRepository _repository) : IBusinessCardService
+    public class BusinessCardService(IBusinessCardRepository _repository, IMapper _mapper) : IBusinessCardService
     {
         public async Task<IEnumerable<BusinessCardDto>> GetAllBusinessCards()
         {
             var cards = await _repository.GetAllAsync();
-            return cards.Select(card => new BusinessCardDto
-            {
-                Name = card.Name,
-                Gender = card.Gender,
-                DateOfBirth = card.DateOfBirth,
-                Email = card.Email,
-                Phone = card.Phone,
-                Address = card.Address,
-                PhotoBase64 = card.PhotoBase64
-            }).ToList();
+
+            return _mapper.Map<IEnumerable<BusinessCardDto>>(cards);
         }
 
         public async Task<BusinessCardDto> CreateBusinessCard(BusinessCardDto businessCardDto)
         {
-            var businessCard = new BusinessCard
-            {
-                Name = businessCardDto.Name,
-                Gender = businessCardDto.Gender,
-                DateOfBirth = businessCardDto.DateOfBirth,
-                Email = businessCardDto.Email,
-                Phone = businessCardDto.Phone,
-                Address = businessCardDto.Address,
-                PhotoBase64 = businessCardDto.PhotoBase64
-            };
+            var businessCard = _mapper.Map<BusinessCard>(businessCardDto);
 
             await _repository.AddAsync(businessCard);
             await _repository.SaveChangesAsync();
